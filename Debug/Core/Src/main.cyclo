@@ -1,0 +1,10 @@
+../Core/Inc/SON_CDC_Logger.h:55:1:__io_putchar	2
+../Core/Inc/SON_CDC_Logger.h:73:16:SON_Log	1
+../Core/Inc/SON_I2C_MPU6050.h:78:13:MPU6050_Init	2
+../Core/Inc/SON_I2C_MPU6050.h:100:13:MPU6050_Read_Accel	1
+../Core/Inc/SON_I2C_MPU6050.h:121:13:MPU6050_Read_Gyro	1
+../Core/Src/main.c:75:5:main	1
+../Core/Src/main.c:143:6:SystemClock_Config	4
+../Core/Src/main.c:190:13:MX_I2C1_Init	2
+../Core/Src/main.c:224:13:MX_GPIO_Init	1
+../Core/Src/main.c:253:6:Error_Handler	1
