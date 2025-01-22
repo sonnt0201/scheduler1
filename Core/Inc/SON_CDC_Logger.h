@@ -39,8 +39,6 @@
 
 // ***************** INTERFACE *******************
 
-uint8_t SON_Log(char* msg, uint16_t len);
-
 
 
 // ************** INCLUDE ***************
@@ -62,19 +60,7 @@ PUTCHAR_PROTOTYPE {
 
 // **************** IMPLEMENTATION *****************
 
-/**
- * @brief Log via COM PORT
- *
- * @param  Buf: Buffer of data to be sent
- * @param  Len: Number of data to be sent (in bytes)
- *
- *  @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
- * */
-inline uint8_t SON_Log(char* msg, uint16_t len){
 
-	return CDC_Transmit_FS(msg, len);
-
-};
 
 
 #ifdef __cplusplus

@@ -6,6 +6,7 @@
 #define data_port GPIOA
 #define data_pin  GPIO_PIN_2
 void dht22_init(void);
-uint8_t DHT22_GetTemp_Humidity(float *Temp, float *Humidity);
+uint8_t DHT22_Get_Temp(float *Temp);
+uint8_t DHT22_Get_Humidity(float *Humidity);
 //--------------------------------------------------
 #endif /* DHT22_H_ */

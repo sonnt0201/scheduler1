@@ -26,7 +26,7 @@
 
 // ******************* DEFINE *************************
 //
-#define MPU6050_ADDR 0x68 << 1
+#define MPU6050_ADDR 0xD0
 
 
 #define SMPLRT_DIV_REG 0x19
@@ -81,6 +81,7 @@ inline void MPU6050_Init (void){
 	HAL_I2C_Mem_Read (&hi2c1, MPU6050_ADDR,WHO_AM_I_REG,1, &check, 1, 1000);
 	if (check == 104) // the sensor is present
 	{
+		printf("MPU Detected\n");
 		// setting PWR Registers
 		Data = 0;
 		HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, PWR_MGMT_1_REG, 1,&Data, 1, 1000);

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -28,6 +29,8 @@
 
 #include <SON_I2C_MPU6050.h>
 #include <dht22.h>
+
+#include "core_cm3.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +51,20 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
+/* Definitions for mpu */
+osThreadId_t mpuHandle;
+const osThreadAttr_t mpu_attributes = {
+  .name = "mpu",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for dht */
+osThreadId_t dhtHandle;
+const osThreadAttr_t dht_attributes = {
+  .name = "dht",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 
 
@@ -58,12 +75,26 @@ I2C_HandleTypeDef hi2c1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
+void TaskMpu(void *argument);
+void TaskDht(void *argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// Function to get current cycle count
+static inline uint32_t DWT_GetCycleCount(void) {
+    return DWT->CYCCNT;
+}
+
+// Function to enable DWT counter
+void DWT_Init(void) {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;  // Enable trace
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;            // Enable cycle counter
+}
 
 
 /* USER CODE END 0 */
@@ -97,38 +128,64 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USB_DEVICE_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
+  MX_USB_DEVICE_Init();
 
 //  MPU6050_Init();
   dht22_init();
+  DWT_Init();
 
-  float temp = 0, humid = 0;
 
  MPU6050_Init();
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of mpu */
+  mpuHandle = osThreadNew(TaskMpu, NULL, &mpu_attributes);
+
+  /* creation of dht */
+  dhtHandle = osThreadNew(TaskDht, NULL, &dht_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  printf("Hello from rtos \n");
 
-	  	  DHT22_GetTemp_Humidity(&temp, &humid);
-
-	  	  int intPart = (int)floorf(temp);
-	  //
-	  	  printf("t=%f\n", temp);
-	  //
-//	  	  MPU6050_Read_Accel();
-	    MPU6050_Read_Gyro();
-	  //	  intPart = (int)floorf(Ax * 100);
-	  	  printf("Gx=%d\n", Gx);
-
-	     HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -245,6 +302,96 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_TaskMpu */
+/**
+  * @brief  Function implementing the mpu thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_TaskMpu */
+void TaskMpu(void *argument)
+{
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
+  /* USER CODE BEGIN 5 */
+
+  uint32_t start = 0;
+  /* Infinite loop */
+  for(;;)
+  {
+
+	 start = DWT_GetCycleCount();
+	  //
+//	  	  MPU6050_Read_Accel();
+	    MPU6050_Read_Accel();
+	  //	  intPart = (int)floorf(Ax * 100);
+//	  	  printf("ax=%d\n",(int) Ax);
+
+
+
+	    // print exe time of mpu task
+//	  	  printf("%d\n",(int)(DWT_GetCycleCount() - start));
+
+    osDelay(1000);
+  }
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_TaskDht */
+/**
+* @brief Function implementing the dht thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_TaskDht */
+void TaskDht(void *argument)
+{
+  /* USER CODE BEGIN TaskDht */
+	float temp = 0;
+//	 TickType_t  start = 0;
+	 uint32_t start = 0;
+
+  /* Infinite loop */
+  for(;;)
+  {
+//	    start = xTaskGetTickCount();
+//	  printf("Hello from rtos \n");
+	  start = DWT_GetCycleCount();
+	 	  	  DHT22_Get_Temp(&temp);
+
+//	 	  	  int intPart = (int)floorf(temp);
+	 	  //
+//	 	  	  printf("t=%d\n",(int) temp);
+
+	 	 	  printf("%d\n",(int)(DWT_GetCycleCount() - start));
+
+
+    osDelay(3000);
+  }
+  /* USER CODE END TaskDht */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
