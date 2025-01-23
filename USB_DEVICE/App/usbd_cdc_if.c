@@ -50,6 +50,8 @@
 
 /* USER CODE BEGIN PRIVATE_TYPES */
 
+
+
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -259,8 +261,22 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+
+
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+  if (*Buf >= 1 && *Buf <= 5) {
+	    period_task_1 = *Buf;
+
+	    period_task_2 = *Buf;
+  }
+
+
+
+
+//    printf("Received: %d\n", len);
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }

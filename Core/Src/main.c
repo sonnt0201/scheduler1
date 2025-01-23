@@ -69,6 +69,25 @@ const osThreadAttr_t dht_attributes = {
 
 
 
+/*
+ * Bội số cho chu kì của task 1
+ *
+ * Chu kì task 1 = period_task_1 * 5000ms
+ *
+ * Giá trị từ 1 -> 5
+ * */
+ uint8_t period_task_1 = 1;
+
+ /*
+  * Bội số cho chu kì của task 2
+  *
+  * Chu kì task 2 = period_task_2 * 1000ms
+  *
+  * Giá trị từ 1 -> 5
+  * */
+uint8_t period_task_2 = 1;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -135,7 +154,7 @@ int main(void)
 
 //  MPU6050_Init();
   dht22_init();
-  DWT_Init();
+//  DWT_Init();
 
 
  MPU6050_Init();
@@ -316,24 +335,24 @@ void TaskMpu(void *argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
 
-  uint32_t start = 0;
+
   /* Infinite loop */
   for(;;)
   {
 
-	 start = DWT_GetCycleCount();
+//	 start = DWT_GetCycleCount();
 	  //
 //	  	  MPU6050_Read_Accel();
 	    MPU6050_Read_Accel();
 	  //	  intPart = (int)floorf(Ax * 100);
-//	  	  printf("ax=%d\n",(int) Ax);
-
+	  	  printf("ax=%d\n",(int) Ax);
+	  	  printf("Period task 2: %d ms\n", period_task_2 * 1000);
 
 
 	    // print exe time of mpu task
 //	  	  printf("%d\n",(int)(DWT_GetCycleCount() - start));
 
-    osDelay(1000);
+    osDelay(period_task_2 * 1000);
   }
   /* USER CODE END 5 */
 }
@@ -357,17 +376,17 @@ void TaskDht(void *argument)
   {
 //	    start = xTaskGetTickCount();
 //	  printf("Hello from rtos \n");
-	  start = DWT_GetCycleCount();
+//	  start = DWT_GetCycleCount();
 	 	  	  DHT22_Get_Temp(&temp);
 
 //	 	  	  int intPart = (int)floorf(temp);
 	 	  //
-//	 	  	  printf("t=%d\n",(int) temp);
+	 	  	  printf("t=%d\n",(int) temp);
+	 	  	  printf("Period task 1: %d ms\n", period_task_1 * 5000);
+//	 	 	  printf("%d\n",(int)(DWT_GetCycleCount() - start));
 
-	 	 	  printf("%d\n",(int)(DWT_GetCycleCount() - start));
 
-
-    osDelay(3000);
+    osDelay(period_task_1 * 5000);
   }
   /* USER CODE END TaskDht */
 }

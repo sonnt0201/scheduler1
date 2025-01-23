@@ -60,6 +60,8 @@ void Error_Handler(void);
 #define data_Pin GPIO_PIN_2
 #define data_GPIO_Port GPIOA
 
+#define DHT_PORT GPIOA
+#define DHT_PIN GPIO_PIN_9
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
