@@ -345,7 +345,7 @@ void TaskMpu(void *argument)
 //	  	  MPU6050_Read_Accel();
 	    MPU6050_Read_Accel();
 	  //	  intPart = (int)floorf(Ax * 100);
-	  	  printf("ax=%d\n",(int) Ax);
+	  	  printf("ax=%c%d.%d\n", (Ax < 0) ? '-': '+',(int) Ax, abs( ((int)(Ax * 10000)) % 10000)  );
 	  	  printf("Period task 2: %d ms\n", period_task_2 * 1000);
 
 
@@ -367,7 +367,7 @@ void TaskMpu(void *argument)
 void TaskDht(void *argument)
 {
   /* USER CODE BEGIN TaskDht */
-	float temp = 0;
+	float temp = 0, humid = 0;
 //	 TickType_t  start = 0;
 	 uint32_t start = 0;
 
@@ -377,7 +377,7 @@ void TaskDht(void *argument)
 //	    start = xTaskGetTickCount();
 //	  printf("Hello from rtos \n");
 //	  start = DWT_GetCycleCount();
-	 	  	  DHT22_Get_Temp(&temp);
+	 	  	  DHT22_GetTemp_Humidity(&temp, &humid);
 
 //	 	  	  int intPart = (int)floorf(temp);
 	 	  //
