@@ -38,6 +38,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+#define NUMBER_OF_TASKS 2
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,9 +51,27 @@
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
+float temp = 0, humid = 0;
+uint8_t period_sec = 1;
+//uint8_t FLAG_period_change = 0;
+void Task_DHT(void) {
+	  DHT22_GetTemp_Humidity(&temp, &humid);
+
+	  	  int intPart = (int)floorf(temp);
+	  //
+	  	  printf("t=%f\n", temp);
+}
+
+void Task_MPU(void) {
+	//	  	  MPU6050_Read_Accel();
+		MPU6050_Read_Accel();
+		  //	  intPart = (int)floorf(Ax * 100);
+ 	  printf("Ax=%f\n",  Ax);
+
+}
 
 
-
+void (*Task_Arr[NUMBER_OF_TASKS])() = {Task_DHT, Task_MPU};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,7 +125,7 @@ int main(void)
 //  MPU6050_Init();
   dht22_init();
 
-  float temp = 0, humid = 0;
+
 
  MPU6050_Init();
 
@@ -115,20 +135,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  printf("Hello from rtos \n");
+	  for (uint8_t i = 0; i < NUMBER_OF_TASKS; i++ ) {
+		  Task_Arr[i]();
+	  }
 
-	  	  DHT22_GetTemp_Humidity(&temp, &humid);
-
-	  	  int intPart = (int)floorf(temp);
-	  //
-	  	  printf("t=%f\n", temp);
-	  //
-//	  	  MPU6050_Read_Accel();
-	    MPU6050_Read_Gyro();
-	  //	  intPart = (int)floorf(Ax * 100);
-	  	  printf("Gx=%d\n", Gx);
-
-	     HAL_Delay(500);
+//	  if (FLAG_period_change == 1) {
+//		  printf("Period updated: %d seconds\n", period_sec);
+//		  FLAG_period_change = 0;
+//	  }
+//	  	  printf("Current period: %d\n", period_sec);
+	     HAL_Delay(1000 * period_sec);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
